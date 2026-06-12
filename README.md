@@ -1,0 +1,2 @@
+# goldfarm
+window term proj
