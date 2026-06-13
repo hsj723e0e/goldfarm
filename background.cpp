@@ -191,58 +191,58 @@ void Background::Draw(HDC hMemDC, RECT rect) {
     }
 
     // 3. 태양 그리기
-    if (m_isSunVisible && m_hSunBit) {
-        HDC hSunDC = CreateCompatibleDC(hMemDC);
-        HBITMAP hOldBit = (HBITMAP)SelectObject(hSunDC, m_hSunBit);
+    //if (m_isSunVisible && m_hSunBit) {
+    //    HDC hSunDC = CreateCompatibleDC(hMemDC);
+    //    HBITMAP hOldBit = (HBITMAP)SelectObject(hSunDC, m_hSunBit);
 
-        BITMAP bm;
-        GetObject(m_hSunBit, sizeof(BITMAP), &bm);
-        TransparentBlt(hMemDC, m_sunX, m_sunY, 60, 60,
-            hSunDC, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 255, 255));
+    //    BITMAP bm;
+    //    GetObject(m_hSunBit, sizeof(BITMAP), &bm);
+    //    TransparentBlt(hMemDC, m_sunX, m_sunY, 60, 60,
+    //        hSunDC, 0, 0, bm.bmWidth, bm.bmHeight, RGB(255, 255, 255));
 
-        SelectObject(hSunDC, hOldBit);
-        DeleteDC(hSunDC);
-    }
+    //    SelectObject(hSunDC, hOldBit);
+    //    DeleteDC(hSunDC);
+    //}
 
-    // 4. 다람쥐 그리기
-    if (m_squirrelVisible && m_hSquirrelBit) {
-        BITMAP bm;
-        GetObject(m_hSquirrelBit, sizeof(BITMAP), &bm);
+    //// 4. 다람쥐 그리기
+    //if (m_squirrelVisible && m_hSquirrelBit) {
+    //    BITMAP bm;
+    //    GetObject(m_hSquirrelBit, sizeof(BITMAP), &bm);
 
-        int frameW = bm.bmWidth / 3; // 4열
-        int frameH = bm.bmHeight / 2; // 2행
+    //    int frameW = bm.bmWidth / 3; // 4열
+    //    int frameH = bm.bmHeight / 2; // 2행
 
-        int col = m_squirrelFrame % 3;
-        int row = m_squirrelFrame / 3;
+    //    int col = m_squirrelFrame % 3;
+    //    int row = m_squirrelFrame / 3;
 
-        HDC hSqDC = CreateCompatibleDC(hMemDC);
-        HBITMAP hOldBit = (HBITMAP)SelectObject(hSqDC, m_hSquirrelBit);
+    //    HDC hSqDC = CreateCompatibleDC(hMemDC);
+    //    HBITMAP hOldBit = (HBITMAP)SelectObject(hSqDC, m_hSquirrelBit);
 
-        TransparentBlt(hMemDC, m_squirrelX, 500, frameW/3, frameH/3,
-            hSqDC, col * frameW, row * frameH, frameW, frameH,
-            RGB(255, 255, 255));
+    //    TransparentBlt(hMemDC, m_squirrelX, 500, frameW/3, frameH/3,
+    //        hSqDC, col * frameW, row * frameH, frameW, frameH,
+    //        RGB(255, 255, 255));
 
-        SelectObject(hSqDC, hOldBit);
-        DeleteDC(hSqDC);
-    }
-    // 5. 새 그리기
-    if (m_birdVisible && m_hBirdBit) {
-        BITMAP bm;
-        GetObject(m_hBirdBit, sizeof(BITMAP), &bm);
+    //    SelectObject(hSqDC, hOldBit);
+    //    DeleteDC(hSqDC);
+    //}
+    //// 5. 새 그리기
+    //if (m_birdVisible && m_hBirdBit) {
+    //    BITMAP bm;
+    //    GetObject(m_hBirdBit, sizeof(BITMAP), &bm);
 
-        int frameW = bm.bmWidth / 12; // 1x12
-        int frameH = bm.bmHeight;
+    //    int frameW = bm.bmWidth / 12; // 1x12
+    //    int frameH = bm.bmHeight;
 
-        HDC hBirdDC = CreateCompatibleDC(hMemDC);
-        HBITMAP hOldBit = (HBITMAP)SelectObject(hBirdDC, m_hBirdBit);
+    //    HDC hBirdDC = CreateCompatibleDC(hMemDC);
+    //    HBITMAP hOldBit = (HBITMAP)SelectObject(hBirdDC, m_hBirdBit);
 
-        TransparentBlt(hMemDC, m_birdX, m_birdY, frameW/2, frameH/2,
-            hBirdDC, m_birdFrame * frameW, 0, frameW, frameH,
-            RGB(0, 0, 0));
+    //    TransparentBlt(hMemDC, m_birdX, m_birdY, frameW/2, frameH/2,
+    //        hBirdDC, m_birdFrame * frameW, 0, frameW, frameH,
+    //        RGB(0, 0, 0));
 
-        SelectObject(hBirdDC, hOldBit);
-        DeleteDC(hBirdDC);
-    }
+    //    SelectObject(hBirdDC, hOldBit);
+    //    DeleteDC(hBirdDC);
+    //}
 }
 
 // 06032148
