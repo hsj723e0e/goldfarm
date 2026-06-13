@@ -22,36 +22,36 @@ private:
     COLORREF LerpColor(COLORREF startColor, COLORREF endColor, float ratio);
     void UpdateSunPosition();
 
-    // ½Ã°£
+    // ì‹œê°„
     TimeState m_timeState;
     float     m_timeProgress;
     COLORREF  m_currentBgColor;
 
-    // ¹è°æ ÀÌ¹ÌÁö
+    // ë°°ê²½ ì´ë¯¸ì§€
     HBITMAP m_hBgBit;
     int     m_bgWidth;
     int     m_bgHeight;
 
-    //// ÅÂ¾ç
-    //HBITMAP m_hSunBit;
-    //int     m_sunX;
-    //int     m_sunY;
-    //bool    m_isSunVisible;
+    // íƒœì–‘
+    HBITMAP m_hSunBit;
+    int     m_sunX;
+    int     m_sunY;
+    bool    m_isSunVisible;
 
-    //// ´Ù¶÷Áã
-    //HBITMAP m_hSquirrelBit;
-    //int     m_squirrelFrame;
-    //float   m_squirrelTimer;
-    //float   m_squirrelAniTimer;
-    //bool    m_squirrelVisible;
-    //int     m_squirrelX;
+    // ë‹¤ëŒì¥
+    HBITMAP m_hSquirrelBit;
+    int     m_squirrelFrame;
+    float   m_squirrelTimer;
+    float   m_squirrelAniTimer;
+    bool    m_squirrelVisible;
+    int     m_squirrelX;
 
-    //// »õ °ü·Ã ¸â¹öº¯¼ö Ãß°¡
-    //HBITMAP m_hBirdBit;
-    //int     m_birdFrame;
-    //float   m_birdAniTimer;
-    //float   m_birdTimer;
-    //bool    m_birdVisible;
-    //int     m_birdX;
-    //int     m_birdY;
+    // ìƒˆ ê´€ë ¨ ë©¤ë²„ë³€ìˆ˜ ì¶”ê°€
+    HBITMAP m_hBirdBit;
+    int     m_birdFrame;
+    float   m_birdAniTimer;
+    float   m_birdTimer;
+    bool    m_birdVisible;
+    int     m_birdX;
+    int     m_birdY;
 };
