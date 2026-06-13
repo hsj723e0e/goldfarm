@@ -3,6 +3,7 @@
 #include "inventory.h"
 #include "Player.h"
 #include <tchar.h>
+#include "SoundManager.h"
 #pragma comment(lib, "msimg32.lib")
 
 extern Player        player;
@@ -14,32 +15,32 @@ extern GoldPotato      invGoldPotato;
 extern GoldCarrot      invGoldCarrot;
 extern GoldStrawberry  invGoldStrawberry;
 // =====================================================================
-//  ·¹ÀÌ¾Æ¿ô »ó¼ö
+//  ë ˆì´ì•„ì›ƒ ìƒìˆ˜
 // =====================================================================
 static const int LAB_X = 0;
 static const int LAB_Y = 0;
 static const int LAB_BG_W = 690;
 static const int LAB_BG_H = 600;
 
-// ³ëµå »ö»ó
+// ë…¸ë“œ ìƒ‰ìƒ
 static const COLORREF NODE_COLOR[LAB_RES_COUNT] = {
-    RGB(0, 220,   0),   // RES_GROW_SPEED - ÃÊ·Ï (´ç±Ù)
-    RGB(255, 165,   0),   // RES_MOVE_SPEED - ÁÖÈ² (°¨ÀÚ)
-    RGB(0, 180, 255),   // RES_CROP_LUCK  - ÆÄ¶û (µş±â)
+    RGB(0, 220,   0),   // RES_GROW_SPEED - ì´ˆë¡ (ë‹¹ê·¼)
+    RGB(255, 165,   0),   // RES_MOVE_SPEED - ì£¼í™© (ê°ì)
+    RGB(0, 180, 255),   // RES_CROP_LUCK  - íŒŒë‘ (ë”¸ê¸°)
 };
 
-// Àç·á ºñ¿ë [Ä«Å×°í¸®][Æ¼¾î]
-// I  : ÀÏ¹İ 10°³
-// II : È²±İ  5°³
-// III: È²±İ 10°³
+// ì¬ë£Œ ë¹„ìš© [ì¹´í…Œê³ ë¦¬][í‹°ì–´]
+// I  : ì¼ë°˜ 10ê°œ
+// II : í™©ê¸ˆ  5ê°œ
+// III: í™©ê¸ˆ 10ê°œ
 static const CostInfo COST[LAB_RES_COUNT][LAB_TIER_COUNT] = {
-    { {10,0}, {0,5}, {0,10} },  // RES_GROW_SPEED (´ç±Ù)
-    { {10,0}, {0,5}, {0,10} },  // RES_MOVE_SPEED (°¨ÀÚ)
-    { {10,0}, {0,5}, {0,10} },  // RES_CROP_LUCK  (µş±â)
+    { {10,0}, {0,5}, {0,10} },  // RES_GROW_SPEED (ë‹¹ê·¼)
+    { {10,0}, {0,5}, {0,10} },  // RES_MOVE_SPEED (ê°ì)
+    { {10,0}, {0,5}, {0,10} },  // RES_CROP_LUCK  (ë”¸ê¸°)
 };
 
 // =====================================================================
-//  »ı¼ºÀÚ / ¼Ò¸êÀÚ
+//  ìƒì„±ì / ì†Œë©¸ì
 // =====================================================================
 Lab::Lab()
     : hBuildingDC(NULL), hBuildingBit(NULL),
@@ -55,7 +56,7 @@ Lab::~Lab() {
 }
 
 // =====================================================================
-//  ÃÊ±âÈ­
+//  ì´ˆê¸°í™”
 // =====================================================================
 void Lab::Init(HWND hWnd) {
     HDC hdc = GetDC(hWnd);
@@ -64,21 +65,21 @@ void Lab::Init(HWND hWnd) {
     hLabBgDC = CreateCompatibleDC(hdc);
     hCheckDC = CreateCompatibleDC(hdc);
 
-    hBuildingBit = (HBITMAP)LoadImage(NULL, L"¿¬±¸¼Ò.bmp",
+    hBuildingBit = (HBITMAP)LoadImage(NULL, L"ì—°êµ¬ì†Œ.bmp",
         IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (hBuildingBit) SelectObject(hBuildingDC, hBuildingBit);
 
-    hLabBgBit = (HBITMAP)LoadImage(NULL, L"¿¬±¸¼Ò_¹è°æ.bmp",
+    hLabBgBit = (HBITMAP)LoadImage(NULL, L"ì—°êµ¬ì†Œ_ë°°ê²½.bmp",
         IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (hLabBgBit) SelectObject(hLabBgDC, hLabBgBit);
 
-    hCheckBit = (HBITMAP)LoadImage(NULL, L"Ã¼Å©.bmp",
+    hCheckBit = (HBITMAP)LoadImage(NULL, L"ì²´í¬.bmp",
         IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     if (hCheckBit) SelectObject(hCheckDC, hCheckBit);
 
     ReleaseDC(hWnd, hdc);
 
-    // ³ëµå À§Ä¡ (¿¬±¸¼Ò_¹è°æ.bmp ±âÁØ)
+    // ë…¸ë“œ ìœ„ì¹˜ (ì—°êµ¬ì†Œ_ë°°ê²½.bmp ê¸°ì¤€)
     nodes[RES_MOVE_SPEED][0] = { RES_MOVE_SPEED, 0, false, {446, 137}, 35, 2 };
     nodes[RES_MOVE_SPEED][1] = { RES_MOVE_SPEED, 1, false, {558, 101}, 35, 2 };
     nodes[RES_MOVE_SPEED][2] = { RES_MOVE_SPEED, 2, false, {678,  71}, 35, 3 };
@@ -93,7 +94,7 @@ void Lab::Init(HWND hWnd) {
 }
 
 // =====================================================================
-//  ÇØÁ¦
+//  í•´ì œ
 // =====================================================================
 void Lab::Release() {
     if (hBuildingBit) { DeleteObject(hBuildingBit); hBuildingBit = NULL; }
@@ -105,20 +106,20 @@ void Lab::Release() {
 }
 
 // =====================================================================
-//  Àç·á È®ÀÎ
+//  ì¬ë£Œ í™•ì¸
 // =====================================================================
 bool Lab::HasEnoughMaterial(ResearchCategory cat, int tier) {
     CostInfo cost = COST[cat][tier];
     switch (cat) {
-    case RES_MOVE_SPEED: // °¨ÀÚ
+    case RES_MOVE_SPEED: // ê°ì
         if (cost.normalCount > 0) return invPotato.GetCount() >= cost.normalCount;
         if (cost.goldCount > 0) return invGoldPotato.GetCount() >= cost.goldCount;
         break;
-    case RES_GROW_SPEED: // ´ç±Ù
+    case RES_GROW_SPEED: // ë‹¹ê·¼
         if (cost.normalCount > 0) return invCarrot.GetCount() >= cost.normalCount;
         if (cost.goldCount > 0) return invGoldCarrot.GetCount() >= cost.goldCount;
         break;
-    case RES_CROP_LUCK:  // µş±â
+    case RES_CROP_LUCK:  // ë”¸ê¸°
         if (cost.normalCount > 0) return invStrawberry.GetCount() >= cost.normalCount;
         if (cost.goldCount > 0) return invGoldStrawberry.GetCount() >= cost.goldCount;
         break;
@@ -127,7 +128,7 @@ bool Lab::HasEnoughMaterial(ResearchCategory cat, int tier) {
 }
 
 // =====================================================================
-//  Àç·á Â÷°¨
+//  ì¬ë£Œ ì°¨ê°
 // =====================================================================
 void Lab::ConsumeMaterial(ResearchCategory cat, int tier) {
     CostInfo cost = COST[cat][tier];
@@ -148,7 +149,7 @@ void Lab::ConsumeMaterial(ResearchCategory cat, int tier) {
 }
 
 // =====================================================================
-//  È÷Æ® Å×½ºÆ®
+//  íˆíŠ¸ í…ŒìŠ¤íŠ¸
 // =====================================================================
 bool Lab::HitTest(ResearchNode* node, int x, int y) {
     int dx = x - node->pos.x;
@@ -157,7 +158,7 @@ bool Lab::HitTest(ResearchNode* node, int x, int y) {
 }
 
 // =====================================================================
-//  ¿¬±¸ Àû¿ë
+//  ì—°êµ¬ ì ìš©
 // =====================================================================
 void Lab::ApplyResearch(ResearchCategory cat, int tier) {
     int val = nodes[cat][tier].value;
@@ -165,21 +166,21 @@ void Lab::ApplyResearch(ResearchCategory cat, int tier) {
     case RES_GROW_SPEED:
         for (int i = 0; i < 8; i++)
             fields[i].AddGrowSpeed(val);
-        growSpeed += val;  // ¡ç ÀÌ°Ô ÅØ½ºÆ®¿¡ Ç¥½ÃµÊ
+        growSpeed += val;  // â† ì´ê²Œ í…ìŠ¤íŠ¸ì— í‘œì‹œë¨
         break;
     case RES_MOVE_SPEED:
         player.AddSpeed(val);
-        moveSpeed += val;  // ¡ç ÀÌ°Ô ÅØ½ºÆ®¿¡ Ç¥½ÃµÊ
+        moveSpeed += val;  // â† ì´ê²Œ í…ìŠ¤íŠ¸ì— í‘œì‹œë¨
         break;
     case RES_CROP_LUCK:
         player.Addfortunate(val);
-        cropLuck += val;   // ¡ç ÀÌ°Ô ÅØ½ºÆ®¿¡ Ç¥½ÃµÊ
+        cropLuck += val;   // â† ì´ê²Œ í…ìŠ¤íŠ¸ì— í‘œì‹œë¨
         break;
     }
 }
 
 // =====================================================================
-//  Å¬¸¯ ÆÇÁ¤
+//  í´ë¦­ íŒì •
 // =====================================================================
 bool Lab::IsClicked(int mx, int my) {
     RECT panel = { LAB_X, LAB_Y, LAB_X + LAB_BG_W, LAB_Y + LAB_BG_H };
@@ -193,27 +194,31 @@ void Lab::OnClick(int mx, int my) {
 
             if (!HitTest(node, mx, my)) continue;
 
-            // ¼±Çà ³ëµå ¹ÌÇØ±İÀÌ¸é ¹İÀÀ ¾øÀ½
+            // ì„ í–‰ ë…¸ë“œ ë¯¸í•´ê¸ˆì´ë©´ ë°˜ì‘ ì—†ìŒ
             if (tier >= 1 && !nodes[cat][0].unlocked) return;
             if (tier >= 2 && !nodes[cat][1].unlocked) return;
 
-            // ÀÌ¹Ì ÇØ±İµÈ °æ¿ì ¹«½Ã
+            // ì´ë¯¸ í•´ê¸ˆëœ ê²½ìš° ë¬´ì‹œ
             if (node->unlocked) return;
 
-            // Àç·á ºÎÁ·ÀÌ¸é ¹İÀÀ ¾øÀ½
+            // ì¬ë£Œ ë¶€ì¡±ì´ë©´ ë°˜ì‘ ì—†ìŒ
             if (!HasEnoughMaterial((ResearchCategory)cat, tier)) return;
-
-            // Àç·á Â÷°¨ ÈÄ ÇØ±İ
+            
+            // ì¬ë£Œ ì°¨ê° í›„ í•´ê¸ˆ
             ConsumeMaterial((ResearchCategory)cat, tier);
             node->unlocked = true;
             ApplyResearch((ResearchCategory)cat, tier);
+            SoundManager::PlaySFX_Donate(); //ìµœì¢…
+            if (tier == 2) { //ìµœì¢…
+                SoundManager::PlaySFX_LevelUp(); // â† ë§ˆì§€ë§‰ ë…¸ë“œì¼ ë•Œë§Œ
+            }
             return;
         }
     }
 }
 
 // =====================================================================
-//  ³ëµå ±×¸®±â (Å×µÎ¸®¸¸, ¿¬°á¼± ¾øÀ½)
+//  ë…¸ë“œ ê·¸ë¦¬ê¸° (í…Œë‘ë¦¬ë§Œ, ì—°ê²°ì„  ì—†ìŒ)
 // =====================================================================
 void Lab::DrawNode(HDC hdc, ResearchNode* node, COLORREF color) {
     int cx = node->pos.x;
@@ -222,7 +227,7 @@ void Lab::DrawNode(HDC hdc, ResearchNode* node, COLORREF color) {
 
     HPEN   pen = CreatePen(PS_SOLID, 3, color);
     HBRUSH brush = node->unlocked
-        ? CreateSolidBrush(color)           // ÇØ±İ: »öÀ¸·Î Ã¤¿ò
+        ? CreateSolidBrush(color)           // í•´ê¸ˆ: ìƒ‰ìœ¼ë¡œ ì±„ì›€
         : (HBRUSH)GetStockObject(NULL_BRUSH);
     HPEN   oldPen = (HPEN)SelectObject(hdc, pen);
     HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, brush);
@@ -234,7 +239,7 @@ void Lab::DrawNode(HDC hdc, ResearchNode* node, COLORREF color) {
     DeleteObject(pen);
     DeleteObject(brush);
 
-    // ÇØ±İ ½Ã Ã¼Å© Ç¥½Ã
+    // í•´ê¸ˆ ì‹œ ì²´í¬ í‘œì‹œ
     if (node->unlocked) {
         HPEN checkPen = CreatePen(PS_SOLID, 4, RGB(255, 255, 255));
         HPEN oldCp = (HPEN)SelectObject(hdc, checkPen);
@@ -245,35 +250,35 @@ void Lab::DrawNode(HDC hdc, ResearchNode* node, COLORREF color) {
         DeleteObject(checkPen);
     }
 
-    // ¹ÌÇØ±İ ½Ã ÇÊ¿ä Àç·á ¼ö·® Ç¥½Ã
+    // ë¯¸í•´ê¸ˆ ì‹œ í•„ìš” ì¬ë£Œ ìˆ˜ëŸ‰ í‘œì‹œ
     if (!node->unlocked) {
         CostInfo cost = COST[node->category][node->tier];
-        wchar_t buf[32]; // ¹®ÀÚ¿­ ¹öÆÛ¸¦ Á¶±İ ´õ ´Ã·ÁÁÜ
+        wchar_t buf[32]; // ë¬¸ìì—´ ë²„í¼ë¥¼ ì¡°ê¸ˆ ë” ëŠ˜ë ¤ì¤Œ
 
-        // 1) Ä«Å×°í¸®¿¡ µû¸¥ ÀÛ¹° ÀÌ¸§ ÆÇÁ¤
+        // 1) ì¹´í…Œê³ ë¦¬ì— ë”°ë¥¸ ì‘ë¬¼ ì´ë¦„ íŒì •
         const wchar_t* cropName = L"";
         switch (node->category) {
-        case RES_GROW_SPEED: cropName = L"´ç±Ù"; break;
-        case RES_MOVE_SPEED: cropName = L"°¨ÀÚ"; break;
-        case RES_CROP_LUCK:  cropName = L"µş±â"; break;
+        case RES_GROW_SPEED: cropName = L"ë‹¹ê·¼"; break;
+        case RES_MOVE_SPEED: cropName = L"ê°ì"; break;
+        case RES_CROP_LUCK:  cropName = L"ë”¸ê¸°"; break;
         }
 
-        // 2) ÀÏ¹İ/È²±İ Æ¼¾î¿¡ µû¸¥ ¹®ÀÚ¿­ Æ÷¸ËÆÃ
+        // 2) ì¼ë°˜/í™©ê¸ˆ í‹°ì–´ì— ë”°ë¥¸ ë¬¸ìì—´ í¬ë§·íŒ…
         if (cost.normalCount > 0)
-            wsprintf(buf, L"%s %d", cropName, cost.normalCount); // ¿¹: ´ç±Ù 10
+            wsprintf(buf, L"%s %d", cropName, cost.normalCount); // ì˜ˆ: ë‹¹ê·¼ 10
         else
-            wsprintf(buf, L"±İ%s %d", cropName, cost.goldCount); // ¿¹: ±İ°¨ÀÚ 5
+            wsprintf(buf, L"ê¸ˆ%s %d", cropName, cost.goldCount); // ì˜ˆ: ê¸ˆê°ì 5
 
         HFONT hFont = CreateFont(22, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
             DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, L"Arial");
         HFONT oldFont = (HFONT)SelectObject(hdc, hFont);
 
-        SetTextColor(hdc, RGB(255, 235, 100)); // ±Û¾¾°¡ Àß º¸ÀÌµµ·Ï ºÎµå·¯¿î ³ë¶õ»ö °è¿­
+        SetTextColor(hdc, RGB(255, 235, 100)); // ê¸€ì”¨ê°€ ì˜ ë³´ì´ë„ë¡ ë¶€ë“œëŸ¬ìš´ ë…¸ë€ìƒ‰ ê³„ì—´
         SetBkMode(hdc, TRANSPARENT);
 
-        // 3) ±ÛÀÚ ±æÀÌ¿¡ ¸ÂÃç Áß¾Ó Á¤·ÄµÇµµ·Ï »ìÂ¦ º¸Á¤ (TextOut ÁÂÇ¥ ¼öÁ¤)
-        // ±âÁ¸ cx - 10 ´ë½Å ±ÛÀÚ ¼ö¿¡ ¸ÂÃç Á¶±İ ´õ ¿ŞÂÊ¿¡¼­ ½ÃÀÛÇÏµµ·Ï Á¶Á¤
+        // 3) ê¸€ì ê¸¸ì´ì— ë§ì¶° ì¤‘ì•™ ì •ë ¬ë˜ë„ë¡ ì‚´ì§ ë³´ì • (TextOut ì¢Œí‘œ ìˆ˜ì •)
+        // ê¸°ì¡´ cx - 10 ëŒ€ì‹  ê¸€ì ìˆ˜ì— ë§ì¶° ì¡°ê¸ˆ ë” ì™¼ìª½ì—ì„œ ì‹œì‘í•˜ë„ë¡ ì¡°ì •
         TextOut(hdc, cx - (lstrlen(buf) * 4), cy - r - 25, buf, lstrlen(buf));
 
         SelectObject(hdc, oldFont);
@@ -282,7 +287,7 @@ void Lab::DrawNode(HDC hdc, ResearchNode* node, COLORREF color) {
 }
 
 // =====================================================================
-//  ÀüÃ¼ ±×¸®±â
+//  ì „ì²´ ê·¸ë¦¬ê¸°
 // =====================================================================
 void Lab::Draw(HDC hdc, HWND hWnd) {
     RECT cr;
@@ -290,7 +295,7 @@ void Lab::Draw(HDC hdc, HWND hWnd) {
     int w = cr.right;
     int h = cr.bottom;
 
-    // 1) ¹è°æ
+    // 1) ë°°ê²½
     if (hLabBgBit) {
         RECT cr;
         GetClientRect(hWnd, &cr);
@@ -303,32 +308,32 @@ void Lab::Draw(HDC hdc, HWND hWnd) {
             RGB(255, 255, 255));
     }
 
-    // 2) ³ëµå ±×¸®±â (¿¬°á¼± ¾øÀ½)
+    // 2) ë…¸ë“œ ê·¸ë¦¬ê¸° (ì—°ê²°ì„  ì—†ìŒ)
     for (int cat = 0; cat < LAB_RES_COUNT; cat++) {
         for (int tier = 0; tier < LAB_TIER_COUNT; tier++) {
             DrawNode(hdc, &nodes[cat][tier], NODE_COLOR[cat]);
         }
     }
 
-    // 3) ÇöÀç ¼öÄ¡ ÅØ½ºÆ®
+    // 3) í˜„ì¬ ìˆ˜ì¹˜ í…ìŠ¤íŠ¸
     wchar_t buf[64];
-    int textX = (int)(w * 0.5);   // ¿ŞÂÊ¿¡¼­ 1%
-    int textY1 = (int)(h * 0.85);  // ¾Æ·¡¿¡¼­ 85%
-    int textY2 = (int)(h * 0.90);  // ¾Æ·¡¿¡¼­ 90%
-    int textY3 = (int)(h * 0.95);  // ¾Æ·¡¿¡¼­ 95%
+    int textX = (int)(w * 0.5);   // ì™¼ìª½ì—ì„œ 1%
+    int textY1 = (int)(h * 0.85);  // ì•„ë˜ì—ì„œ 85%
+    int textY2 = (int)(h * 0.90);  // ì•„ë˜ì—ì„œ 90%
+    int textY3 = (int)(h * 0.95);  // ì•„ë˜ì—ì„œ 95%
 
-    wsprintf(buf, L"¼ºÀå¼Óµµ +%d", growSpeed);
+    wsprintf(buf, L"ì„±ì¥ì†ë„ +%d", growSpeed);
     DrawText_(hdc, buf, textX, textY1, RGB(0, 220, 0), 30);
 
-    wsprintf(buf, L"ÀÌµ¿¼Óµµ +%d", moveSpeed);
+    wsprintf(buf, L"ì´ë™ì†ë„ +%d", moveSpeed);
     DrawText_(hdc, buf, textX, textY2, RGB(255, 165, 0), 30);
 
-    wsprintf(buf, L"ÀÛ¹°Çà¿î +%d", cropLuck);
+    wsprintf(buf, L"ì‘ë¬¼í–‰ìš´ +%d", cropLuck);
     DrawText_(hdc, buf, textX, textY3, RGB(0, 180, 255), 30);
 }
 
 // =====================================================================
-//  °Ç¹° ±×¸®±â
+//  ê±´ë¬¼ ê·¸ë¦¬ê¸°
 // =====================================================================
 void Lab::DrawBuilding(HDC hdc) {
     if (!hBuildingBit) return;
@@ -343,7 +348,7 @@ void Lab::DrawBuilding(HDC hdc) {
 }
 
 // =====================================================================
-//  ÅØ½ºÆ® ÇïÆÛ
+//  í…ìŠ¤íŠ¸ í—¬í¼
 // =====================================================================
 void Lab::DrawText_(HDC hdc, const wchar_t* text, int x, int y,
     COLORREF color, int fontSize) {
