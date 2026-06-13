@@ -1,5 +1,6 @@
-﻿#include "museum.h"
+#include "museum.h"
 #include "Player.h"
+#include "SoundManager.h" //최종
 #pragma comment(lib, "msimg32.lib")
 extern Player player;
 
@@ -323,6 +324,7 @@ void Museum::OnClick(int mx, int my) {
             else if (i == 3) pGoldStrawberry->SubCount(need);
 
             slotDonated[fortunateStage][i] = true;
+            SoundManager::PlaySFX_Donate(); //최종
 
             // 4개 모두 기증 완료 → 다음 단계로
             bool allDone = true;
@@ -330,6 +332,7 @@ void Museum::OnClick(int mx, int my) {
                 if (!slotDonated[fortunateStage][j]) { allDone = false; break; }
             if (allDone) {
                 fortunateStage++;
+                SoundManager::PlaySFX_LevelUp();
                 if (fortunateStage == 1) {
                     player.Addfortunate(20);
                 }
