@@ -1,39 +1,40 @@
 #include "shop.h"
 #include "Player.h"
+#include "SoundManager.h"
 extern Player player;
 #pragma comment(lib, "msimg32.lib")
 
 // =====================================================================
-//  ·¹ÀÌ¾Æ¿ô »ó¼ö
+//  ë ˆì´ì•„ì›ƒ ìƒìˆ˜
 // =====================================================================
 
-// »óÁ¡ UI ¹è°æ Ãâ·Â À§Ä¡/Å©±â
+// ìƒì  UI ë°°ê²½ ì¶œë ¥ ìœ„ì¹˜/í¬ê¸°
 static const int SHOP_X = 0;
 static const int SHOP_Y = 0;
 static const int SHOP_BG_W = 700 ;
 static const int SHOP_BG_H = 500;
 
-// ½½·Ô ÁÂÇ¥ (»óÁ¡_¹è°æ.bmp ¾ÈÀÇ ¾ÆÀÌÅÛ Ä­ À§Ä¡)
-static const int SLOT_START_X = 145;  // Ã¹ ¹øÂ° ½½·Ô X
-static const int SLOT_START_Y = 115;  // Ã¹ ¹øÂ° ½½·Ô Y
-static const int SLOT_W = 130;  // ½½·Ô ³Êºñ
-static const int SLOT_H = 155;  // ½½·Ô ³ôÀÌ
-static const int SLOT_GAP_X = 148;  // ½½·Ô °¡·Î °£°İ
-static const int SLOT_GAP_Y = 178;  // ½½·Ô ¼¼·Î °£°İ
+// ìŠ¬ë¡¯ ì¢Œí‘œ (ìƒì _ë°°ê²½.bmp ì•ˆì˜ ì•„ì´í…œ ì¹¸ ìœ„ì¹˜)
+static const int SLOT_START_X = 145;  // ì²« ë²ˆì§¸ ìŠ¬ë¡¯ X
+static const int SLOT_START_Y = 115;  // ì²« ë²ˆì§¸ ìŠ¬ë¡¯ Y
+static const int SLOT_W = 130;  // ìŠ¬ë¡¯ ë„ˆë¹„
+static const int SLOT_H = 155;  // ìŠ¬ë¡¯ ë†’ì´
+static const int SLOT_GAP_X = 148;  // ìŠ¬ë¡¯ ê°€ë¡œ ê°„ê²©
+static const int SLOT_GAP_Y = 178;  // ìŠ¬ë¡¯ ì„¸ë¡œ ê°„ê²©
 
-// µ· UI (¿ì»ó´Ü)
+// ëˆ UI (ìš°ìƒë‹¨)
 static const int MONEY_UI_X = 660;
 static const int MONEY_UI_Y = 10;
 static const int MONEY_UI_W = 160;
 static const int MONEY_UI_H = 36;
 
 // =====================================================================
-//  »ı¼ºÀÚ / ¼Ò¸êÀÚ
+//  ìƒì„±ì / ì†Œë©¸ì
 // =====================================================================
 Shop::Shop()
     : hBuildingDC(NULL), hBuildingBit(NULL),
     hShopBgDC(NULL), hShopBgBit(NULL), hLockBit(NULL),
-    money(player.GetMoney()), shopX(SHOP_X), shopY(SHOP_Y)      // 6/8 ¼­Áø¾¾
+    money(player.GetMoney()), shopX(SHOP_X), shopY(SHOP_Y)      // 6/8 ì„œì§„ì”¨
 {
     for (int i = 0; i < 4; i++) {
         hItemDC[i] = NULL;
@@ -47,26 +48,26 @@ Shop::~Shop() {
 }
 
 // =====================================================================
-//  ÃÊ±âÈ­
+//  ì´ˆê¸°í™”
 // =====================================================================
 void Shop::Init(HWND hWnd) {
     HDC hdc = GetDC(hWnd);
 
     const wchar_t* itemImages[4] = {
-    L"¹Ğ1.bmp",
-    L"°¨ÀÚ1.bmp",
-    L"´ç±Ù1.bmp",
-    L"µş±â1.bmp"
+    L"ë°€1.bmp",
+    L"ê°ì1.bmp",
+    L"ë‹¹ê·¼1.bmp",
+    L"ë”¸ê¸°1.bmp"
     };
 
     hBuildingDC = CreateCompatibleDC(hdc);
     hShopBgDC = CreateCompatibleDC(hdc);
     hLockDC = CreateCompatibleDC(hdc);
 
-    // ÀÌ¹ÌÁö ·Îµå
-    hBuildingBit = (HBITMAP)LoadImage(NULL, L"»óÁ¡.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hShopBgBit = (HBITMAP)LoadImage(NULL, L"»óÁ¡_¹è°æ.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hLockBit = (HBITMAP)LoadImage(NULL, L"ÁÂ¹°¼è.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    // ì´ë¯¸ì§€ ë¡œë“œ
+    hBuildingBit = (HBITMAP)LoadImage(NULL, L"ìƒì .bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hShopBgBit = (HBITMAP)LoadImage(NULL, L"ìƒì _ë°°ê²½.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hLockBit = (HBITMAP)LoadImage(NULL, L"ì¢Œë¬¼ì‡ .bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
     if (hBuildingBit) SelectObject(hBuildingDC, hBuildingBit);
     if (hShopBgBit)   SelectObject(hShopBgDC, hShopBgBit);
@@ -80,7 +81,7 @@ void Shop::Init(HWND hWnd) {
 
     ReleaseDC(hWnd, hdc);
 
-    // ½½·Ô 8°³ RECT °è»ê
+    // ìŠ¬ë¡¯ 8ê°œ RECT ê³„ì‚°
     for (int r = 0; r < SHOP_ROWS; r++) {
         for (int c = 0; c < SHOP_COLS; c++) {
             int idx = r * SHOP_COLS + c;
@@ -92,7 +93,7 @@ void Shop::Init(HWND hWnd) {
 }
 
 // =====================================================================
-//  ÇØÁ¦
+//  í•´ì œ
 // =====================================================================
 void Shop::Release() {
     if (hBuildingBit) { DeleteObject(hBuildingBit); hBuildingBit = NULL; }
@@ -111,7 +112,7 @@ void Shop::Release() {
 }
 
 // =====================================================================
-//  ÀüÃ¼ ±×¸®±â
+//  ì „ì²´ ê·¸ë¦¬ê¸°
 // =====================================================================
 void Shop::Draw(HDC hdc, HWND hWnd) {
     DrawBackground(hdc, hWnd);
@@ -120,7 +121,7 @@ void Shop::Draw(HDC hdc, HWND hWnd) {
 }
 
 // =====================================================================
-//  ¹è°æ: »óÁ¡_¹è°æ.bmp Ãâ·Â (Å©±â ¹ö±× ¼öÁ¤)
+//  ë°°ê²½: ìƒì _ë°°ê²½.bmp ì¶œë ¥ (í¬ê¸° ë²„ê·¸ ìˆ˜ì •)
 // =====================================================================
 void Shop::DrawBackground(HDC hdc, HWND hWnd) {
     if (!hShopBgBit) return;
@@ -128,9 +129,9 @@ void Shop::DrawBackground(HDC hdc, HWND hWnd) {
     BITMAP bm;
     GetObject(hShopBgBit, sizeof(bm), &bm);
 
-    // ±âÁ¸¿¡´Â windowWidth, windowHeight·Î Ã¢ ÀüÃ¼¿¡ ¹è°æ ÀÌ¹ÌÁö¸¦ ¾ïÁö·Î ´Ã·Á¹ö·Á¼­ 
-    // Å¬¸¯ ÁÂÇ¥(itemRects)¿Í È­¸é»ó¿¡ ±×·ÁÁö´Â »óÁ¡ ¾ÆÀÌÅÛ À§Ä¡°¡ ºÒÀÏÄ¡Çß½À´Ï´Ù.
-    // ÀÌ¸¦ Á¤ÇØÁø UI Å©±â(SHOP_BG_W, SHOP_BG_H)·Î °íÁ¤ÇÏ¿© ±×¸³´Ï´Ù.
+    // ê¸°ì¡´ì—ëŠ” windowWidth, windowHeightë¡œ ì°½ ì „ì²´ì— ë°°ê²½ ì´ë¯¸ì§€ë¥¼ ì–µì§€ë¡œ ëŠ˜ë ¤ë²„ë ¤ì„œ 
+    // í´ë¦­ ì¢Œí‘œ(itemRects)ì™€ í™”ë©´ìƒì— ê·¸ë ¤ì§€ëŠ” ìƒì  ì•„ì´í…œ ìœ„ì¹˜ê°€ ë¶ˆì¼ì¹˜í–ˆìŠµë‹ˆë‹¤.
+    // ì´ë¥¼ ì •í•´ì§„ UI í¬ê¸°(SHOP_BG_W, SHOP_BG_H)ë¡œ ê³ ì •í•˜ì—¬ ê·¸ë¦½ë‹ˆë‹¤.
     TransparentBlt(hdc,
         SHOP_X, SHOP_Y, SHOP_BG_W, SHOP_BG_H,
         hShopBgDC,
@@ -139,7 +140,7 @@ void Shop::DrawBackground(HDC hdc, HWND hWnd) {
 }
 
 // =====================================================================
-//  ¾ÆÀÌÅÛ ½½·Ô 8°³¿¡ ÀÌ¹ÌÁö Ãâ·Â
+//  ì•„ì´í…œ ìŠ¬ë¡¯ 8ê°œì— ì´ë¯¸ì§€ ì¶œë ¥
 // =====================================================================
 void Shop::DrawItems(HDC hdc, HWND hWnd) {
     bool isUnlocked[4] = {
@@ -149,7 +150,7 @@ void Shop::DrawItems(HDC hdc, HWND hWnd) {
         player.GetUnlockStrawberry()
     };
     for (int i = 0; i < SHOP_ITEM_COUNT; i++) {
-        int col = i % 4;  // 0~3¿­
+        int col = i % 4;  // 0~3ì—´
         RECT& r = itemRects[i];
         int pad = 5;
 
@@ -179,7 +180,7 @@ void Shop::DrawItems(HDC hdc, HWND hWnd) {
 }
 
 // =====================================================================
-//  »óÁ¡ °Ç¹° ÀÌ¹ÌÁö
+//  ìƒì  ê±´ë¬¼ ì´ë¯¸ì§€
 // =====================================================================
 void Shop::DrawBuilding(HDC hdc) {
     if (!hBuildingBit) return;
@@ -196,7 +197,7 @@ void Shop::DrawBuilding(HDC hdc) {
 }
 
 // =====================================================================
-//  µ· UI (¿ì»ó´Ü)
+//  ëˆ UI (ìš°ìƒë‹¨)
 // =====================================================================
 void Shop::DrawMoneyUI(HDC hdc, HWND hWnd) {
     RECT clientRect;
@@ -236,7 +237,7 @@ void Shop::DrawMoneyUI(HDC hdc, HWND hWnd) {
 }
 
 // =====================================================================
-//  Å¬¸¯ Ã³¸® (¸í½ÃÀû POINT »ç¿ë)
+//  í´ë¦­ ì²˜ë¦¬ (ëª…ì‹œì  POINT ì‚¬ìš©)
 // =====================================================================
 bool Shop::IsClicked(int mx, int my) {
     POINT pt = { mx, my };
@@ -248,8 +249,8 @@ void Shop::OnClick(int mx, int my) {
     POINT pt = { mx, my };
     for (int i = 0; i < SHOP_ITEM_COUNT; i++) {
         if (PtInRect(&itemRects[i], pt)) {
-            int row = i / 4;  // 0=±¸¸Å, 1=ÆÇ¸Å
-            int col = i % 4;  // 0=¹Ğ, 1=°¨ÀÚ, 2=´ç±Ù, 3=µş±â
+            int row = i / 4;  // 0=êµ¬ë§¤, 1=íŒë§¤
+            int col = i % 4;  // 0=ë°€, 1=ê°ì, 2=ë‹¹ê·¼, 3=ë”¸ê¸°
 
             bool isUnlocked[4] = {
                 player.GetUnlockWheat(),
@@ -258,27 +259,28 @@ void Shop::OnClick(int mx, int my) {
                 player.GetUnlockStrawberry()
             };
 
-            // ÁÖ¼® Ã³¸® µÇ¾îÀÖ´ø ¸Ş½ÃÁö ¹Ú½º¸¦ Ç®¾î¼­ ÇÇµå¹éÀ» Á¦°øÇÕ´Ï´Ù.
+            // ì£¼ì„ ì²˜ë¦¬ ë˜ì–´ìˆë˜ ë©”ì‹œì§€ ë°•ìŠ¤ë¥¼ í’€ì–´ì„œ í”¼ë“œë°±ì„ ì œê³µí•©ë‹ˆë‹¤.
             if (!isUnlocked[col]) {
-                MessageBox(NULL, L"¹çÀ» ¸ÕÀú ÇØ±İÇØ¾ß ÇØ´ç ÀÛ¹°À» °Å·¡ÇÒ ¼ö ÀÖ½À´Ï´Ù!", L"»óÁ¡ Àá±İ", MB_OK | MB_ICONWARNING);
+                MessageBox(NULL, L"ë°­ì„ ë¨¼ì € í•´ê¸ˆí•´ì•¼ í•´ë‹¹ ì‘ë¬¼ì„ ê±°ë˜í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤!", L"ìƒì  ì ê¸ˆ", MB_OK | MB_ICONWARNING);
                 break;
             }
 
             if (row == 0) {
-                // 1Çà: ±¸¸Å
+                // 1í–‰: êµ¬ë§¤
                 if (money >= 10) {
                     money -= 10;
                     if (col == 0) pWheat->AddCount(1);
                     else if (col == 1) pPotato->AddCount(1);
                     else if (col == 2) pCarrot->AddCount(1);
                     else if (col == 3) pStrawberry->AddCount(1);
+                    SoundManager::PlaySFX_Shop();
                 }
                 else {
-                    MessageBox(NULL, L"µ·ÀÌ ºÎÁ·ÇÕ´Ï´Ù!", L"¾Ë¸²", MB_OK);
+                    MessageBox(NULL, L"ëˆì´ ë¶€ì¡±í•©ë‹ˆë‹¤!", L"ì•Œë¦¼", MB_OK);
                 }
             }
             else {
-                // 2Çà: ÆÇ¸Å
+                // 2í–‰: íŒë§¤
                 int cnt = 0;
                 if (col == 0) cnt = pWheat->GetCount();
                 else if (col == 1) cnt = pPotato->GetCount();
@@ -291,18 +293,19 @@ void Shop::OnClick(int mx, int my) {
                     else if (col == 1) pPotato->SubCount(1);
                     else if (col == 2) pCarrot->SubCount(1);
                     else if (col == 3) pStrawberry->SubCount(1);
+                    SoundManager::PlaySFX_Shop(); //ìµœì¢…
                 }
                 else {
-                    MessageBox(NULL, L"ÆÇ¸ÅÇÒ ÀÛ¹°ÀÌ ÀÎº¥Åä¸®¿¡ ¾ø½À´Ï´Ù!", L"¾Ë¸²", MB_OK);
+                    MessageBox(NULL, L"íŒë§¤í•  ì‘ë¬¼ì´ ì¸ë²¤í† ë¦¬ì— ì—†ìŠµë‹ˆë‹¤!", L"ì•Œë¦¼", MB_OK);
                 }
             }
-            break; // ¾ÆÀÌÅÛÀ» Ã£¾ÒÀ¸¹Ç·Î for ·çÇÁ Å»Ãâ
+            break; // ì•„ì´í…œì„ ì°¾ì•˜ìœ¼ë¯€ë¡œ for ë£¨í”„ íƒˆì¶œ
         }
     }
 }
 
 // =====================================================================
-//  ÅØ½ºÆ® Ãâ·Â ÇïÆÛ
+//  í…ìŠ¤íŠ¸ ì¶œë ¥ í—¬í¼
 // =====================================================================
 void Shop::DrawText_(HDC hdc, const wchar_t* text, int x, int y,
     COLORREF color, int fontSize) {
